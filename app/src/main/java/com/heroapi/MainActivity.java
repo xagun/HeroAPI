@@ -1,7 +1,14 @@
 package com.heroapi;
 
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.StrictMode;
+import android.provider.MediaStore;
+import android.support.annotation.Nullable;
+import android.support.v4.content.CursorLoader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -10,6 +17,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -28,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText etName, etDesc;
     private Button btnSave;
     private ImageView imgDisplay;
+    String imagePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +48,19 @@ public class MainActivity extends AppCompatActivity {
         etDesc = findViewById(R.id.etDesc);
         btnSave = findViewById(R.id.btnSave);
         imgDisplay = findViewById(R.id.imgDisplay);
-        loadfromURL();
+//        loadfromURL();
 
+        imgDisplay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BrowseImage();
+            }
+
+
+
+
+
+        });
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,26 +71,72 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void StrictMode() {
-        android.os.StrictMode.ThreadPolicy policy = new android.os.StrictMode.ThreadPolicy.Builder().permitAll().build();
-        android.os.StrictMode.setThreadPolicy(policy);
+
+    private void BrowseImage() {
+
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        startActivityForResult(intent,0);
     }
 
-    private void loadfromURL() {
-        StrictMode();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
 
-        String imgURL = "https://images-na.ssl-images-amazon.com/images/I/81D%2BXXEnHBL._SY550_.jpg";
-        URL url = null;
-        try {
-            url = new URL(imgURL);
-            imgDisplay.setImageBitmap(BitmapFactory.decodeStream((InputStream) url.getContent()));
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(resultCode == RESULT_OK){
+            if(data == null){
+                Toast.makeText(this, "Please select image", Toast.LENGTH_SHORT).show();
+            }
+        }
+        Uri uri = data.getData();
+        imagePath = getRealPathFromUri(uri);
+        previewImage(imagePath);
+    }
+
+    private void previewImage(String imagePath){
+
+        File imgFile = new File(imagePath);
+        if(imgFile.exists()){
+            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            imgDisplay.setImageBitmap(myBitmap);
         }
 
-
     }
+
+    private String getRealPathFromUri(Uri uri){
+        String[] projection = {MediaStore.Images.Media.DATA};
+        CursorLoader loader = new CursorLoader(getApplicationContext(),uri, projection, null, null, null);
+        Cursor cursor =loader.loadInBackground();
+        int colIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String result = cursor.getString(colIndex);
+        cursor.close();
+        return result;
+    }
+//    private void StrictMode() {
+//        android.os.StrictMode.ThreadPolicy policy = new android.os.StrictMode.ThreadPolicy.Builder().permitAll().build();
+//        android.os.StrictMode.setThreadPolicy(policy);
+//    }
+
+//    private void loadfromURL() {
+//        StrictMode();
+//
+//
+//        String imgURL = "https://images-na.ssl-images-amazon.com/images/I/81D%2BXXEnHBL._SY550_.jpg";
+//        URL url = null;
+//        try {
+//            url = new URL(imgURL);
+//            imgDisplay.setImageBitmap(BitmapFactory.decodeStream((InputStream) url.getContent()));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//
+//    }
+
+
+
 
     private void Save() {
         String name = etName.getText().toString();
@@ -102,4 +168,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 }
