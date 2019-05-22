@@ -35,6 +35,6 @@ public interface HeroAPI {
 
     @GET("heroes")
     Call<List<Heroes>> getAllHeroes();
-
+//
 
 }
