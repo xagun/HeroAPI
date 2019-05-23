@@ -25,6 +25,7 @@ import java.net.URL;
 
 import heroapi.HeroAPI;
 import model.Heroes;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -114,6 +115,18 @@ public class MainActivity extends AppCompatActivity {
         cursor.close();
         return result;
     }
+
+    private void StrictMode(){
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+    }
+
+
+
+    private void SaveImageOnly(){
+        File file  = new File(imagePath);
+        RequestBody requestBody =
+    }
 //
 //    private void StrictMode() {
 //        android.os.StrictMode.ThreadPolicy policy = new android.os.StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -168,6 +181,8 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Error" + t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+
     }
+
 
 }
